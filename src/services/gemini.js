@@ -13,8 +13,12 @@ export async function identifyTrash(imageFile) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ data, mimeType: imageFile.type }),
     });
-    if (!res.ok) throw new Error(`identify failed: ${res.status}`);
-    return await res.json();
+    const body = await res.json();
+    if (!res.ok) {
+      console.error("identify server response:", body);
+      throw new Error(`identify failed: ${res.status}`);
+    }
+    return body;
   } catch (error) {
     console.error("Gemini Scan Error:", error);
     return null;
