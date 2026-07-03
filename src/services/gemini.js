@@ -1,41 +1,22 @@
-// src/services/gemini.js
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-
-if (!API_KEY) {
-  console.error("Missing VITE_GEMINI_API_KEY. Set it in .env for local dev or as a GitHub secret for deployment.");
-}
-
-const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+// src/services/gemini.js — calls our serverless function; key lives server-side.
 
 export async function identifyTrash(imageFile) {
   try {
-    // Convert image to Base64
-    const base64Data = await new Promise((resolve) => {
+    const data = await new Promise((resolve) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result.split(',')[1]);
       reader.readAsDataURL(imageFile);
     });
 
-    const prompt = `
-      Analyze this trash item.
-      1. Is it RECYCLABLE in Singapore? (Boolean).
-      2. What is the item name? (Short string).
-      3. Why? (Short 1-sentence reason).
-      4. Return ONLY JSON: { "isRecyclable": true, "itemName": "Plastic Bottle", "reason": "It is clean PET plastic." }
-    `;
-
-    const result = await model.generateContent([
-      prompt,
-      { inlineData: { data: base64Data, mimeType: imageFile.type } }
-    ]);
-    
-    const text = result.response.text().replace(/```json|```/g, '').trim();
-    return JSON.parse(text);
+    const res = await fetch("/api/identify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data, mimeType: imageFile.type }),
+    });
+    if (!res.ok) throw new Error(`identify failed: ${res.status}`);
+    return await res.json();
   } catch (error) {
     console.error("Gemini Scan Error:", error);
-    return null; 
+    return null;
   }
 }
