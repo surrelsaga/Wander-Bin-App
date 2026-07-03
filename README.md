@@ -2,6 +2,8 @@
 
 A mobile-first web prototype for the CRAB-E smart recycling robot, designed for HDB residents in Singapore. Built as a Wizard-of-Oz prototype for user testing.
 
+🔗 **Live app:** https://wanderbin-app.vercel.app/
+
 ## Features
 
 - **Summon** — Browse nearby bots and request one to your location
