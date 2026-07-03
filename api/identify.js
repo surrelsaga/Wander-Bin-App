@@ -24,6 +24,10 @@ export default async function handler(req, res) {
     return res.status(200).json(JSON.parse(text));
   } catch (error) {
     console.error("Gemini Scan Error:", error);
-    return res.status(500).json({ error: "scan failed" });
+    return res.status(500).json({
+      error: "scan failed",
+      detail: error?.message,
+      hasKey: Boolean(process.env.GEMINI_API_KEY),
+    });
   }
 }
